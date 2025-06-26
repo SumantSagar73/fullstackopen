@@ -3,6 +3,7 @@ import Filter from './components/Filter'
 import PersonForm from './components/PersonForm'
 import Persons from './components/Persons'
 import personService from './services/persons'
+import Notification from './components/Notification'
 
 const App = () => {
   const [persons, setPersons] = useState([
@@ -11,13 +12,16 @@ const App = () => {
   const [newNumber, setNewNumber] = useState('')
 
   const [filterTerm, setFilterTerm] = useState('')
+  const [notification, setNotification] = useState(null)
+  const [notificationType, setNotificationType] = useState('success') // or 'error'
+
 
   useEffect(() =>{
     personService
       .getAll()
       .then(
-        response =>{
-        setPersons(response.data)
+        data =>{
+        setPersons(data)
   })
   }, [])
 
@@ -47,10 +51,13 @@ const App = () => {
           )
           setNewName('')
           setNewNumber('')
+          showNotification(`Updated ${returnedPerson.name}'s number`, 'success')
+
         })
         .catch(error =>{
-        alert(`Information of ${newName} was already removed from the server`)
-        setPersons(persons.filter(p => p.id !== existingPerson.id))
+          showNotification(`Information of ${existingPerson.name} has already been removed from server`, 'error')
+          setPersons(persons.filter(p => p.id !== existingPerson.id))
+
         })
       }
       return
@@ -66,6 +73,8 @@ const App = () => {
         setPersons(persons.concat(returnedPerson))
         setNewName('')
         setNewNumber('')
+        showNotification(`Added ${returnedPerson.name}`, 'success')
+
       })
   
 
@@ -93,17 +102,30 @@ const App = () => {
       .remove(id)
       .then(() => {
         setPersons(persons.filter(n => n.id !== id))
+            showNotification(`Deleted ${person.name}`, 'success')
+
       })
       .catch(() => {
-        alert(`The person "${person.name}" was already deleted on the server`)
+        showNotification(`The person "${person.name}" was already deleted`, 'error')
+
         setPersons(persons.filter(n => n.id !== id)) // clean up locally too
       })
     
   }
 
+  const showNotification = (message, type = 'success') =>{
+    setNotification(message)
+    setNotificationType(type)
+
+    setTimeout(() =>{
+      setNotification(null)
+    }, 4000)
+  }
+
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message = {notification} type = {notificationType}/>
       
       <Filter value= {filterTerm}
       onChange={handleFilterChange}/>
