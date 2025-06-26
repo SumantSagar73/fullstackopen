@@ -52,9 +52,7 @@ const App = () => {
 
         {selectedCountry && (
           <>
-          <CountryDetails selectedCountry={selectedCountry} onBack={() => setSelectedCountry(null)}/>
-        
-        
+          <CountryDetails selectedCountry={selectedCountry} onBack={() => setSelectedCountry(null)}/>   
           </>
         )}
       </div>
